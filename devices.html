@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Devices</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head>
+<body>
+<div class="container py-4">
+  <div class="d-flex justify-content-between mb-3"><h4>Manage Devices</h4><div><a class="btn btn-secondary" href="dashboard.html">Back</a></div></div>
+  <div class="card mb-3 p-3">
+    <form id="addDevice" class="row g-2">
+      <div class="col-md-3"><input class="form-control" name="device_name" placeholder="Device name" required></div>
+      <div class="col-md-2"><input class="form-control" name="mac" placeholder="MAC"></div>
+      <div class="col-md-2"><input class="form-control" name="ip" placeholder="IP"></div>
+      <div class="col-md-2"><input class="form-control" name="zone" placeholder="Zone"></div>
+      <div class="col-md-1"><input class="form-control" name="bw" placeholder="BW" type="number" step="0.1"></div>
+      <div class="col-md-2"><button class="btn btn-primary">Add Device</button></div>
+    </form>
+  </div>
+  <div class="card p-3"><div class="table-responsive"><table class="table" id="devicesTable"><thead><tr><th>Name</th><th>MAC</th><th>IP</th><th>Zone</th><th>BW</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+<script>
+function getDevices(){ return JSON.parse(localStorage.getItem('bbuc_devices')||'[]'); }
+function saveDevices(a){ localStorage.setItem('bbuc_devices', JSON.stringify(a)); }
+function render(){ const tbody=document.querySelector('#devicesTable tbody'); tbody.innerHTML=''; getDevices().forEach(d=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.device_name}</td><td>${d.mac||''}</td><td>${d.ip||''}</td><td>${d.zone||''}</td><td>${d.bandwidth||0}</td><td>${d.status||'active'}</td><td><button class="btn btn-sm ${d.status==='active'?'btn-danger':'btn-success'} toggle" data-id="${d.id}">${d.status==='active'?'Block':'Unblock'}</button></td>`; tbody.appendChild(tr); }); }
+document.getElementById('addDevice').addEventListener('submit',(e)=>{ e.preventDefault(); const f=e.target; let arr=getDevices(); const id=arr.length?Math.max(...arr.map(x=>x.id))+1:1; arr.unshift({id:id,device_name:f.device_name.value.trim(),mac:f.mac.value.trim(),ip:f.ip.value.trim(),zone:f.zone.value.trim(),bandwidth:parseFloat(f.bw.value)||0,status:'active'}); saveDevices(arr); f.reset(); render(); });
+document.addEventListener('click',(ev)=>{ if(ev.target.matches('.toggle')){ const id=+ev.target.dataset.id; let arr=getDevices(); arr=arr.map(d=>d.id===id?{...d,status:d.status==='active'?'blocked':'active'}:d); saveDevices(arr); render(); } });
+if(!localStorage.getItem('bbuc_devices')) localStorage.setItem('bbuc_devices', JSON.stringify([])); render();
+</script></body></html>

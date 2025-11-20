@@ -1,0 +1,14 @@
+:root{
+  --primary:#1E2A78;
+  --accent:#4F46E5;
+  --muted:#6B7280;
+}
+body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:#f4f6fb;}
+.sidebar{min-height:100vh;background:linear-gradient(180deg,var(--primary),var(--accent));color:#fff;}
+.sidebar a{color:rgba(255,255,255,0.92);display:block;padding:10px 12px;border-radius:8px;margin-bottom:6px;text-decoration:none}
+.sidebar a.active, .sidebar a:hover{background:rgba(255,255,255,0.06)}
+.card{border-radius:12px;box-shadow:0 6px 18px rgba(18,25,60,0.06);border:none;}
+.header-note{color:var(--muted);font-size:0.9rem}
+.kpi{font-size:28px;font-weight:700;color:var(--primary)}
+.logo{height:44px}
+.footer-note{font-size:0.85rem;color:var(--muted);padding:12px 0}

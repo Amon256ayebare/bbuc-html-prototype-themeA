@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Dashboard</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>.sidebar{min-height:100vh}.main{padding:24px}</style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 sidebar p-3">
+      <div class="text-white mb-3"><img src="assets/img/logo.png" class="logo"> <div class="mt-2 fw-bold">BBUC WiFi</div></div>
+      <a href="dashboard.html" class="active">Overview</a>
+      <a href="users.html">Users & Devices</a>
+      <a href="devices.html">Devices</a>
+      <a href="zones.html">Zones</a>
+      <a href="#" id="logout" style="margin-top:20px;color:#fff;display:block">Logout</a>
+    </nav>
+    <main class="col-md-10 main">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Dashboard Overview</h3>
+        <div id="who" class="header-note"></div>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-4"><div class="card p-3"><small class="text-muted">Active Users</small><div class="kpi" id="activeUsers">0</div></div></div>
+        <div class="col-md-4"><div class="card p-3"><small class="text-muted">Blocked Devices</small><div class="kpi" id="blockedDevices">0</div></div></div>
+        <div class="col-md-4"><div class="card p-3"><small class="text-muted">Zones</small><div class="kpi" id="zonesCount">0</div></div></div>
+      </div>
+      <div class="card p-3 mb-3">
+        <h6>Bandwidth (sample)</h6>
+        <canvas id="bwChart" height="120"></canvas>
+      </div>
+      <div class="card p-3"><h6>Quick Actions</h6><a class="btn btn-primary me-2" href="users.html">Manage Users</a><a class="btn btn-secondary" href="devices.html">Manage Devices</a></div>
+    </main>
+  </div>
+</div>
+
+<script>
+const session = JSON.parse(localStorage.getItem('bbuc_session')||'null');
+if(session){ document.getElementById('who').innerHTML = 'Signed in as <strong>'+session.user+'</strong>'; }
+else{ document.getElementById('who').innerHTML = '<small class="text-muted">Demo Mode</small>'; }
+
+if(!localStorage.getItem('bbuc_sample_seeded')){
+  const users=[{id:1,name:'Amon',email:'amon@example.com',status:'active'}];
+  const devices=[{id:1,device_name:'Amon-Laptop',mac:'AC:23:3F:9A:11:22',ip:'10.0.0.23',zone:'Library AP',status:'active',bandwidth:12.4},{id:2,device_name:'Lab-PC-1',mac:'CC:33:AA:23:77:88',ip:'10.0.1.5',zone:'Computer Lab AP',status:'blocked',bandwidth:0}];
+  const zones=[{id:1,zone_name:'Library AP',clients:15,health:95},{id:2,zone_name:'Main Hall AP',clients:120,health:98}];
+  localStorage.setItem('bbuc_users', JSON.stringify(users));
+  localStorage.setItem('bbuc_devices', JSON.stringify(devices));
+  localStorage.setItem('bbuc_zones', JSON.stringify(zones));
+  localStorage.setItem('bbuc_sample_seeded','1');
+}
+
+function refresh(){
+  const users=JSON.parse(localStorage.getItem('bbuc_users')||'[]');
+  const devices=JSON.parse(localStorage.getItem('bbuc_devices')||'[]');
+  const zones=JSON.parse(localStorage.getItem('bbuc_zones')||'[]');
+  document.getElementById('activeUsers').textContent = users.filter(u=>u.status!=='blocked').length;
+  document.getElementById('blockedDevices').textContent = devices.filter(d=>d.status==='blocked').length;
+  document.getElementById('zonesCount').textContent = zones.length;
+  return devices;
+}
+const devicesArr = refresh();
+const ctx = document.getElementById('bwChart').getContext('2d');
+new Chart(ctx,{type:'line',data:{labels:['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00'],datasets:[{label:'Bandwidth (Mbps)',data:devicesArr.map(d=>d.bandwidth).concat(Array(12-devicesArr.length).fill(0)).slice(0,12),tension:0.4,borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,0.12)',fill:true}]},options:{responsive:true}});
+document.getElementById('logout').addEventListener('click',(e)=>{ e.preventDefault(); localStorage.removeItem('bbuc_session'); window.location.href='index.html'; });
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Zones</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css"></head>
+<body>
+<div class="container py-4">
+  <div class="d-flex justify-content-between mb-3"><h4>Zones / Access Points</h4><div><a class="btn btn-secondary" href="dashboard.html">Back</a></div></div>
+  <div class="card mb-3 p-3">
+    <form id="addZone" class="row g-2">
+      <div class="col-md-5"><input class="form-control" name="zone_name" placeholder="Zone name" required></div>
+      <div class="col-md-3"><input class="form-control" name="clients" placeholder="Clients" type="number"></div>
+      <div class="col-md-2"><input class="form-control" name="health" placeholder="Health (%)" type="number"></div>
+      <div class="col-md-2"><button class="btn btn-primary w-100">Add Zone</button></div>
+    </form>
+  </div>
+  <div class="row g-3" id="zonesList"></div>
+</div>
+<script>
+function getZones(){ return JSON.parse(localStorage.getItem('bbuc_zones')||'[]'); }
+function saveZones(a){ localStorage.setItem('bbuc_zones', JSON.stringify(a)); }
+function render(){ const container=document.getElementById('zonesList'); container.innerHTML=''; getZones().forEach(z=>{ const div=document.createElement('div'); div.className='col-md-4'; div.innerHTML=`<div class="card p-3"><h5>${z.zone_name}</h5><p class="mb-1 small text-muted">Clients: ${z.clients}</p><p class="mb-1 small text-muted">Health: ${z.health}%</p><div><button class="btn btn-sm btn-danger del" data-id="${z.id}">Delete</button></div></div>`; container.appendChild(div); }); }
+document.getElementById('addZone').addEventListener('submit',(e)=>{ e.preventDefault(); const f=e.target; let arr=getZones(); const id=arr.length?Math.max(...arr.map(x=>x.id))+1:1; arr.unshift({id:id,zone_name:f.zone_name.value.trim(),clients:parseInt(f.clients.value)||0,health:parseInt(f.health.value)||100}); saveZones(arr); f.reset(); render(); });
+document.addEventListener('click',(ev)=>{ if(ev.target.matches('.del')){ const id=+ev.target.dataset.id; let arr=getZones(); arr=arr.filter(z=>z.id!==id); saveZones(arr); render(); } });
+if(!localStorage.getItem('bbuc_zones')) localStorage.setItem('bbuc_zones', JSON.stringify([])); render();
+</script></body></html>
